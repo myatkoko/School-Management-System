@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html style="height: 100%">
+    <head>
+        <title>Main Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>       
+        <script src="https://code.jquery.com/jquery-3.4.0.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>                   
+        <script>
+            $(document).ready(function () {
+                var studentClass;
+                var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                $('#addPickTimeTableClass').on('change', function () {
+                    var timetable = $('#settimeTable');
+                    var time;
+                    var inputForm;
+                    studentClass = $("#addPickTimeTableClass option:selected").text();
+
+                    timetable.empty();
+
+                    if (studentClass === '6' || studentClass === '7' || studentClass === '9 ECO' || studentClass === '9 BIO') {
+                        time = '<div class="row" style="padding: 20px"><div class = "col-sm-3"><div>' + studentClass + ' </div></div><div class = "col-sm-3"><div> 8:00 am to 9:30 am </div></div><div class = "col-sm-3"><div> 9:30 am to 11:00 am </div></div><div class = "col-sm-3"><div> 11:00 am to 12:30 am </div></div></div>';
+                        timetable.append(time);
+                        for (var i = 0; i < 7; i++) {
+                            inputForm = '<div class="col-sm-3">' + days[i] + '</div><div class="col-sm-3"><input type="text" class="form-control" id= ' + days[i] + '_0' + '></input></div><div class="col-sm-3"><input type="text" class="form-control" id= ' + days[i] + '_1' + '></input></div><div class="col-sm-3"><input type="text" class="form-control" id= ' + days[i] + '_2' + '></input></div>';
+                            timetable.append('<div class="row" style="padding: 10px">' + inputForm + '</div>');
+                        }
+                    } else {
+                        time = '<div class="row" style="padding: 20px; text-align: center"><div class = "col-sm-2">' + studentClass + ' </div><div class = "col-sm-2"> 1:00 to 2:00 </div><div class = "col-sm-2"> 2:00 to 3:00 </div><div class = "col-sm-2"> 3:00 to 4:00 </div><div class = "col-sm-2"> 4:00 to 5:00 </div></div>';
+                        timetable.append(time);
+                        for (var i = 0; i < 7; i++) {
+                            inputForm = '<div class="col-sm-2">' + days[i] + '</div><div class="col-sm-2"><input type="text" class="form-control" id= ' + days[i] + '_0' + '></input></div><div class="col-sm-2"><input type="text" class="form-control" id= ' + days[i] + '_1' + '></input></div><div class="col-sm-2"><input type="text" class="form-control" id= ' + days[i] + '_2' + '></input></div><div class="col-sm-2"><input type="text" class="form-control" id= ' + days[i] + '_3' + '></input></div>';
+                            timetable.append('<div class="row" style="padding: 10px; text-align: center">' + inputForm + '</div>');
+                        }
+                    }
+                })
+
+                $('#getPickTimeTableClass').on('change', function () {
+                    var timetable = $('#gettimeTable');
+                    var getStudentClass = $("#getPickTimeTableClass option:selected").text();
+                    $.ajax({
+                        url: "http://localhost:8080/Admin/TimeTable/api/getTimeTable?class=" + getStudentClass,
+                        type: 'GET',
+                        processData: false,
+                        contentType: "application/json",
+                        cache: false,
+                        success: function (data, textStatus, jqXHR) {
+                            timetable.empty();
+                            console.log(data);
+                            var sum = 0;
+                            if (getStudentClass === '6' || getStudentClass === '7' || getStudentClass === '9 ECO' || getStudentClass === '9 BIO') {
+                                var time_row = '<div class="row" style="padding: 20px"><div class = "col-sm-3"><div>' + getStudentClass + ' </div></div><div class = "col-sm-3"><div> 8:00 am to 9:30 am </div></div><div class = "col-sm-3"><div> 9:30 am to 11:00 am </div></div><div class = "col-sm-3"><div> 11:00 am to 12:30 am </div></div></div>';
+                                var subject_column = '';
+                                var subject_row = '';
+                                timetable.append(time_row);
+                                $.each(data, function (i, data) {
+                                    subject_column += '<div class="col-sm-3"' + data.studentDay + '_' + i + '">' + data.studentSubject + '</div>';
+                                    if (sum === 2) {
+                                        subject_row += '<div class="row"><div class="col-sm-3">' + data.studentDay + '</div>' + subject_column + '</div>';
+                                        timetable.append(subject_row);
+                                        subject_row = '';
+                                        subject_column = '';
+                                        sum = 0;
+                                    } else {
+                                        sum = sum + 1;
+                                    }
+                                })
+                            } else {
+                                var time_row = '<div class="row" style="padding: 20px"><div class = "col-sm-2"><div>' + getStudentClass + ' </div></div><div class = "col-sm-2"><div> 1:00 to 2:00 </div></div><div class = "col-sm-2"><div> 2:00 to 3:00 </div></div><div class = "col-sm-2"><div> 3:00 to 4:00 </div></div><div class = "col-sm-2"><div> 4:00 to 5:00 </div></div></div>';
+                                var subject_column = '';
+                                var subject_row = '';
+                                timetable.append(time_row);
+                                $.each(data, function (i, data) {
+                                    subject_column += '<div class="col-sm-2" id="' + data.studentDay + '_' + i + '">' + data.studentSubject + '</div>';
+                                    if (sum === 3) {
+                                        subject_row += '<div class="row"><div class="col-sm-3">' + data.studentDay + '</div>' + subject_column + '</div>';
+                                        timetable.append(subject_row);
+                                        subject_row = '';
+                                        subject_column = '';
+                                        sum = 0;
+                                    } else {
+                                        sum = sum + 1;
+                                    }
+                                })
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.log(jqXHR)
+                        }
+                    })
+                })
+
+                $('#upload_submit').click(function () {
+                    var subject;
+                    var day;
+                    var array = [];
+                    if (studentClass === '6' || studentClass === '7' || studentClass === '9 ECO' || studentClass === '9 BIO') {
+                        for (var i = 0; i < days.length; i++) {
+                            day = days[i];
+                            for (var j = 0; j < 3; j++) {
+                                var object = {};
+                                subject = $('#' + day + "_" + j).val();
+                                object["studentDay"] = day;
+                                object["studentSubject"] = subject;
+                                object["studentClass"] = studentClass;
+                                array.push(object);
+                            }
+
+                        }
+                    } else {
+                        for (var i = 0; i < days.length; i++) {
+                            day = days[i];
+                            for (var j = 0; j < 4; j++) {
+                                var object = {};
+                                subject = $('#' + day + "_" + j).val();
+                                object["studentDay"] = day;
+                                object["studentSubject"] = subject;
+                                object["studentClass"] = studentClass;
+                                array.push(object);
+                            }
+
+                        }
+                    }
+                    var jsonString = JSON.stringify(array);
+                    $.ajax({
+                        url: "http://localhost:8080/Admin/TimeTable/submit_timetable",
+                        type: 'POST',
+                        processData: false,
+                        contentType: "application/json",
+                        cache: false,
+                        data: jsonString,
+                        success: function (data, textStatus, jqXHR) {
+                            window.location.reload();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.log(jqXHR)
+                        }
+                    })
+                })
+            })
+        </script>
+    </head>
+    <body style="height: 100%">
+        <div class="container-fluid h-100">
+            <div class="row h-100">
+                <!-- left side container -->
+                <div class="col-sm-2" style="background: #e0e0e0">
+                    <ul class="sidebar navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/StudentAttendance/AddAttendance">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Add Attendance</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/StudentAttendance/GetByDay">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Get By Day</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/StudentAttendance/GetByMonth">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Get By Month</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/StudentAttendance/GetByStudent">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Get By Student</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/Admin/StudentEntry/">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>StudentEntry</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/TimeTable/">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>TimeTable</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- left side container -->
+
+                <!-- right side container -->
+                <!-- button group -->
+                <div class="col-sm-10" style="padding: 10px"> 
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".student-timetable" data-backdrop="static" data-keyboard="false" style="margin: 10px">Add new timetable</button>
+                    </div>
+                    <select id="getPickTimeTableClass" style="margin:  10px">
+                        <option disabled selected value> -- select class -- </option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9 ECO">9 ECO</option>
+                        <option value="9 BIO">9 BIO</option>
+                        <option value="10 ECO">10 ECO</option>
+                        <option value="10 BIO">10 BIO</option>
+                    </select>
+                    <!-- button group -->
+                    <div class="container-fluid" id="gettimeTable"></div>                        
+                    <!-- right side container -->
+                </div>                  
+            </div>
+
+            <!--upload modal -->   
+            <div class="modal fade student-timetable" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content" style="padding: 20px" id="studentTimeTableBody">
+                        <select id="addPickTimeTableClass" style="margin:  10px">
+                            <option disabled selected value> -- select class -- </option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9 ECO">9 ECO</option>
+                            <option value="9 BIO">9 BIO</option>
+                            <option value="10 ECO">10 ECO</option>
+                            <option value="10 BIO">10 BIO</option>
+                        </select>
+                        <div class="container-fluid" id="settimeTable"></div>     
+                        <div style="text-align: right; padding: 20px">
+                            <button type="submit" class="btn btn-primary" id="upload_submit">Submit</button>
+                            <button type="reset" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- upload modal -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </body>
+</html>
